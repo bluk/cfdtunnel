@@ -28,8 +28,6 @@
 
           cfgService = {
             DynamicUser = true;
-            User = cfg.user;
-            Group = cfg.group;
             Restart = "on-failure";
             RestartSecs = "5s";
           };
@@ -51,24 +49,6 @@
                 Access token
               '';
             };
-
-            user = lib.mkOption {
-              default = "cloudflared";
-              type = lib.types.str;
-              description = lib.mdDoc ''
-                User which the service will run as. If it is set to "cloudflared", that
-                user will be created.
-              '';
-            };
-
-            group = lib.mkOption {
-              default = "cloudflared";
-              type = lib.types.str;
-              description = lib.mdDoc ''
-                Group which the service will run as. If it is set to "cloudflared", that
-                group will be created.
-              '';
-            };
           };
 
           config = lib.mkIf cfg.enable {
@@ -80,18 +60,6 @@
                 ExecStart = "${cfg.package}/bin/cloudflared --protocol quic tunnel --no-autoupdate run --token ${cfg.token}";
               } // cfgService;
             };
-
-            users.users = lib.mkIf (cfg.user == "cloudflared") {
-                cloudflared = {
-                  isSystemUser = true;
-                  home = cfg.package;
-                  inherit (cfg) group;
-                };
-              };
-
-            users.groups = lib.mkIf (cfg.group == "cloudflared") {
-                cloudflared = { };
-              };
           };
         };
     };
